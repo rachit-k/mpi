@@ -20,8 +20,8 @@
 #include <iostream>
 #include <algorithm>
 #include <unordered_map>
-#include <pthread.h>
 #include <mpi.h>
+#include <chrono>
 
 using namespace std;
 
@@ -55,11 +55,14 @@ int main(int argc, char **argv)
 {
 
 	int processes,rank;
-	float *A;
-	float *B;
-	float *C;
 	int n;
 	int m;
+	cin>>n;
+	m=32;
+	float *A=new float[n*m];//n*m
+	float *B=new float[m*n];//m*n
+	float *C=new float[n*n];//n*n
+	float *C_serial=new float[n*n];//n*n
 
 	MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
@@ -101,10 +104,19 @@ int main(int argc, char **argv)
 		}
 	}
 
+	if(rank==0)
+    {
+    	std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
+    	Multiply_serial(A,B,C_serial,n,m,n); 
+    	cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+
+    	cout<<IsEqual(C,C_serial,n,n)<<endl;
+    	cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+
+    }
+
 
 	// MPI_Barrier(MPI_COMM_WORLD);
-
-
 
 	MPI_Finalize();
 	return 0;
