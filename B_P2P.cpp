@@ -40,7 +40,7 @@ void Multiply_serial(float *A, float *B, float *C, int m, int n, int p)//mn*np=m
 
 int IsEqual(float *A, float *B, int m, int n)
 {
-	for (int i = 0; i < m; i++i)
+	for (int i = 0; i < m; ++i)
 	{
 		for (int j = 0; j < n; j++)
 		{
@@ -54,11 +54,12 @@ int IsEqual(float *A, float *B, int m, int n)
 int main(int argc, char **argv) 
 {
 
-	int processes,rank;
+	int processes=4,rank;
 	int n;
 	int m;
-	cin>>n;
+	n=1000;
 	m=32;
+	int p;
 	float *A=new float[n*m];//n*m
 	float *B=new float[m*n];//m*n
 	float *C=new float[n*n];//n*n
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int i;
+	std::chrono::time_point<std::chrono::system_clock> parallel = std::chrono::system_clock::now();
 	if(rank==0)
 	{
 		for(i=1;i<processes;i++)
@@ -94,7 +96,8 @@ int main(int argc, char **argv)
 
 	if (rank != 0 )
 	{
-		MPI_Send(&C[(rank) *n * n/processes][0], n*n/processes, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+		int ind=(rank) *n * n/processes;
+		MPI_Send(& (C[ind]), n*n/processes, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
 	}
 	else
 	{
@@ -103,7 +106,7 @@ int main(int argc, char **argv)
 			MPI_Recv(&C[i *n *n/processes], n*n / processes, MPI_FLOAT, i, 0, MPI_COMM_WORLD, 0);
 		}
 	}
-
+	cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - parallel)).count()<<endl;
 	if(rank==0)
     {
     	std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
