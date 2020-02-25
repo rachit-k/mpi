@@ -40,7 +40,7 @@ void Multiply_serial(float *A, float *B, float *C, int m, int n, int p)//mn*np=m
 
 int IsEqual(float *A, float *B, int m, int n)
 {
-	for (int i = 0; i < m; i++i)
+	for (int i = 0; i < m; i++)
 	{
 		for (int j = 0; j < n; j++)
 		{
@@ -57,7 +57,8 @@ int main(int argc, char **argv)
 	int processes,rank;
 	int n;
 	int m;
-	cin>>n;
+	// cin>>n;
+	n=10000;
 	m=32;
 	float *A=new float[n*m];//n*m
 	float *B=new float[m*n];//m*n
@@ -68,6 +69,7 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int i;
+    cout<<"rank:"<<rank<<" processes:"<<processes<<endl;
     std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
 	if(rank==0)
 	{
@@ -86,19 +88,21 @@ int main(int argc, char **argv)
 	MPI_Bcast(B, m*n , MPI_FLOAT, 0, MPI_COMM_WORLD);		
 
 	int startrow = rank * ( n / processes);
-	int endrow = ((rank + 1) * ( n / processes)) -1;
+	int endrow = ((rank + 1) * ( n / processes));
 
 	float *C_temp=new float[n*n/processes];// n*n/processes
-
-    for (int i = startrow; i <= endrow; i++) 
+	
+	int l=0;
+    for (int i = startrow; i < endrow; i++) 
     {
         for (int j = 0; j < n; j++) 
         {
-        	C_temp[i*n+j]=0;
+        	C_temp[l]=0;
             for (int k = 0; k < m; k++) 
             {
-                C_temp[i*n+j] += A[ (i*m + k) ] * B[ (k*n + j) ];
+                C_temp[l] += A[ (i*m + k) ] * B[ (k*n + j) ];
             }
+            l++;
         }
     }
 
@@ -112,7 +116,7 @@ int main(int argc, char **argv)
     	cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
 
     	cout<<IsEqual(C,C_serial,n,n)<<endl;
-    	cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+    	//cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
 
     }
 
