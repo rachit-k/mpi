@@ -75,8 +75,8 @@ int main(int argc, char **argv)
 		{  
 			for (int j = 0; j < m; j++)
 			{
-				A[i*m+j] = double (rand()%10)+0.1;
-				B[j+i*m] = double (rand()%10)+0.1;
+				A[i*m+j] = float (rand()%10)+0.1;
+				B[j+i*m] = float (rand()%10)+0.1;
 			}
 		}
 
