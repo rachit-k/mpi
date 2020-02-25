@@ -68,14 +68,15 @@ int main(int argc, char **argv)
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     int i;
+    std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
 	if(rank==0)
 	{
 		for (int i = 0; i < n; i++)
 		{  
 			for (int j = 0; j < m; j++)
 			{
-				A[i][j] = double (rand()%10)+0.1;
-				B[j][i] = double (rand()%10)+0.1;
+				A[i*m+j] = double (rand()%10)+0.1;
+				B[j+i*m] = double (rand()%10)+0.1;
 			}
 		}
 
@@ -93,15 +94,16 @@ int main(int argc, char **argv)
     {
         for (int j = 0; j < n; j++) 
         {
-        	C[i*n+j]=0;
+        	C_temp[i*n+j]=0;
             for (int k = 0; k < m; k++) 
             {
-                C[i*n+j] += A[ (i*m + k) ] * B[ (k*n + j) ];
+                C_temp[i*n+j] += A[ (i*m + k) ] * B[ (k*n + j) ];
             }
         }
     }
 
     MPI_Gather(C_temp, n*n/processes, MPI_FLOAT, C, n*n/processes,  MPI_FLOAT, 0, MPI_COMM_WORLD);
+    cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
 
     if(rank==0)
     {
