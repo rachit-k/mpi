@@ -54,10 +54,10 @@ int IsEqual(float *A, float *B, int m, int n)
 int main(int argc, char **argv) 
 {
 
-	int processes=4,rank;
+	int processes,rank;
 	int n;
 	int m;
-	n=1000;
+	cin>>n;
 	m=32;
 	int p;
 	float *A=new float[n*m];//n*m
