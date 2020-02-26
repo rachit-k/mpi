@@ -1,15 +1,15 @@
-all:	NB_P2P NB_P2P collective
+all:	block nonblock collective
 OS := $(shell uname)
 ifeq ($(OS), Darwin)
-	CFLAGS= -Xpreprocessor -fopenmp -pthread 
+	CFLAGS=  
 else
-	CFLAGS= -Wall -fopenmp -pthread
+	CFLAGS= 
 endif
-B_P2P:
-	g++ $(CFLAGS) B_P2P.cpp -o B_P2P
-NB_P2P:
-	g++  NB_P2P.cpp -o NB_P2P
+block:
+	mpic++ $(CFLAGS) B_P2P.cpp -o block
+nonblock:
+	mpic++  NB_P2P.cpp -o nonblock
 collective:
-	g++ $(CFLAGS) collective.cpp -o collective
+	mpic++ $(CFLAGS) collective.cpp -o collective
 clean: 
-	rm -f NB_P2P NB_P2P collective check.py *.out
+	rm -f block nonblock collective check.py *.out
