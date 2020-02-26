@@ -85,6 +85,9 @@ int main(int argc, char **argv)
 	MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	//cout<<"Matrix sent for process i"<<endl;
+	MPI_Request request1=0, request2=0;
+	MPI_Status status;
     int i;
     if(rank==0)
 	{
@@ -104,16 +107,29 @@ int main(int argc, char **argv)
 	{
 		for(i=1;i<processes;i++)
 		{
-			MPI_Isend(&A[i*n*m/processes],n*m/processes , MPI_FLOAT, i, 0, MPI_COMM_WORLD);
-			MPI_Isend(B,m*n , MPI_FLOAT, i, 0, MPI_COMM_WORLD);
+			cout<<"Matrix sent for rank "<<rank<<endl;
+			MPI_Isend(&A[i*n*m/processes],n*m/processes , MPI_FLOAT, i, 0, MPI_COMM_WORLD,&request1 );
+			MPI_Wait(&request1, &status);
+			MPI_Wait(&request2, &status);
+			cout<<"Matrix sent for process j"<<endl;
+			MPI_Isend(B,m*n , MPI_FLOAT, i, 0, MPI_COMM_WORLD, &request1);
+			MPI_Wait(&request1, &status);
+			cout<<"Matrix sent for process i"<<endl;
 		}		 
 	}
 	else
 	{
-		MPI_Irecv(&A[rank*n*m/processes],n*m/processes , MPI_FLOAT, i, 0, MPI_COMM_WORLD, 0);
-		MPI_Irecv(B,m*n , MPI_FLOAT, i, 0, MPI_COMM_WORLD, 0);
+		cout<<"Matrix received for process rank "<<rank<<endl;
+		//MPI_Wait(&request1, &status);
+		cout<<"Matrix received for process rank "<<rank<<endl;
+		MPI_Irecv(&A[rank*n*m/processes],n*m/processes , MPI_FLOAT, i, 0, MPI_COMM_WORLD,  &request1);
+		MPI_Wait(&request2, &status);
+		cout<<"Matrix received for process rank "<<rank<<endl;
+		MPI_Irecv(B,m*n , MPI_FLOAT, i, 0, MPI_COMM_WORLD, &request1);
+		MPI_Wait(&request2, &status);
 	}
-
+	
+	cout<<"MAtrix sent"<<endl;
 	for (int i = rank*n/processes; i < (rank+1)*n/processes; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -127,7 +143,7 @@ int main(int argc, char **argv)
 	if (rank != 0 )
 	{
 		int ind=rank * n * n/processes;
-		MPI_Isend(& (C[ind]), n*n/processes, MPI_FLOAT, 0, 0, MPI_COMM_WORLD);
+		MPI_Isend(& (C[ind]), n*n/processes, MPI_FLOAT, 0, 0, MPI_COMM_WORLD, &request1);
 	}
 	else
 	{
@@ -136,6 +152,7 @@ int main(int argc, char **argv)
 			MPI_Irecv(&C[i *n *n/processes], n*n / processes, MPI_FLOAT, i, 0, MPI_COMM_WORLD, 0);
 		}
 	}
+	MPI_Wait(&request1, &status);
     cout<<"parallel time: "<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
     if(rank==0)
     {
