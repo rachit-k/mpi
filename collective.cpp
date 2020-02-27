@@ -71,7 +71,7 @@ int main(int argc, char **argv)
 	B=new float[m*n];//m*n
 	C=new float[n*n];//n*n
 	C_serial=new float[n*n];//n*n
-
+	bool sparse=false;
 	MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -86,8 +86,18 @@ int main(int argc, char **argv)
 		{  
 			for (int j = 0; j < m; j++)
 			{
-				A[i*m+j] = float (rand()%10)+0.1;
-				B[j+i*m] = float (rand()%10)+0.1;
+				float sparse1=1.0;
+				float sparse2=1.0;
+				if(sparse){
+					float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+					if(r>0.2)
+						sparse1=0.0;
+					r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+					if(r>0.2)
+						sparse2=0.0;
+				}
+				A[i*m+j] = (float (rand()%10)+0.1)*sparse1;
+				B[j+i*m] = (float (rand()%10)+0.1)*sparse2;
 			}
 		}
 	
