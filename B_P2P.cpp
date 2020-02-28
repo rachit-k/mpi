@@ -123,8 +123,9 @@ int main(int argc, char **argv)
 	{
 		MPI_Recv(&A[rank*n*m/processes],n*m/processes , MPI_FLOAT, 0, 0, MPI_COMM_WORLD, 0);
 		MPI_Recv(B,m*n , MPI_FLOAT, 0, 0, MPI_COMM_WORLD, 0);
+		//cout<<"parallel time till receiving: for rank "<<rank<<" :"<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
 	}
-
+	std::chrono::time_point<std::chrono::system_clock> multiply = std::chrono::system_clock::now();
 	for (int i = rank*n/processes; i < (rank+1)*n/processes; i++)
 	{
 		for (int j = 0; j < n; j++)
@@ -134,7 +135,7 @@ int main(int argc, char **argv)
 				C[i*n + j] += A[i*m + k] * B[k*n + j];
 		}
 	}
-
+	cout<<"mult"<<rank<<" "<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - multiply)).count()<<endl;
 	if (rank != 0 )
 	{
 		int ind=rank * n * n/processes;
@@ -147,14 +148,14 @@ int main(int argc, char **argv)
 			MPI_Recv(&C[i *n *n/processes], n*n / processes, MPI_FLOAT, i, 0, MPI_COMM_WORLD, 0);
 		}
 	}
-    cout<<"parallel time:"<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+    cout<<"parallel_time:"<<rank<<" "<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
     if(rank==0)
     {
     	std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
     	Multiply_serial(A,B,C_serial,n,m,n); 
-    	cout<<"serial time:"<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+    	cout<<"serial_time: "<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
 
-    	cout<<"IsEqual:"<<IsEqual(C,C_serial,n,n)<<endl;
+    	cout<<"IsEqual: "<<IsEqual(C,C_serial,n,n)<<endl;
     	//print_matrix(C,vars[0],vars[0]);
 
 

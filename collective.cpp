@@ -75,8 +75,6 @@ int main(int argc, char **argv)
 	MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &processes);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    cout<<"rank:"<<rank<<" processes:"<<processes<<endl;
     std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
 	if(rank==0)
 	{
@@ -113,6 +111,7 @@ int main(int argc, char **argv)
 	float *C_temp=new float[vars[0]*vars[0]/processes];// n*n/processes
 
 	int l=0;
+	std::chrono::time_point<std::chrono::system_clock> multiply = std::chrono::system_clock::now();
     for (int i = startrow; i < endrow; i++) 
     {
         for (int j = 0; j < vars[0]; j++) 
@@ -125,18 +124,17 @@ int main(int argc, char **argv)
             l++;
         }
     }
-
+	cout<<"mult"<<rank<<" "<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - multiply)).count()<<endl;
     MPI_Gather(C_temp, vars[0]*vars[0]/processes, MPI_FLOAT, C, vars[0]*vars[0]/processes,  MPI_FLOAT, 0, MPI_COMM_WORLD);
-    cout<<"parallel time: "<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
-
+    cout<<"parallel_time:"<<rank<<" "<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
     if(rank==0)
     {
     	std::chrono::time_point<std::chrono::system_clock> begin = std::chrono::system_clock::now();
     	Multiply_serial(A,B,C_serial,vars[0],vars[1],vars[0]); 
-    	cout<<"serial time: "<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+    	cout<<"serial_time: "<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
 
     	cout<<"IsEqual: "<<IsEqual(C,C_serial,vars[0],vars[0])<<endl;
-    	// cout<< (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
+    	// cout<< (std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - begin)).count()<<endl;
     }
 
 	// MPI_Barrier(MPI_COMM_WORLD);
