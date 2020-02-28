@@ -5,11 +5,12 @@ import numpy as np
 name=sys.argv[1]
 vals=['10','50', '100','200', '500', '1000', '2000', '4000', '10000', '20000']
 val2=['10','50', '100','200', '500', '1000', '2000', '4000', '10000']
+val3=['10','50', '100','200', '500', '1000', '2000']
 p=sys.argv[2]
 with open('data_'+name+p+'.csv', 'w', newline='') as file:
     writer = csv.writer(file)
     writer.writerow(["n=?", "Parallel", "Comm", "Serial"])
-    for i in vals: #,'1200', '1400', '2000', '2500', '5000', '10000']:
+    for i in val3: #,'1200', '1400', '2000', '2500', '5000', '10000']:
         s=subprocess.check_output(['./run.sh', name, p, i])
         splitt=s.decode().split('\n')
        # paralleltime=[]

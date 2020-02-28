@@ -1,4 +1,4 @@
-n=?,Parallel,Comm,Serial
+n,Parallel,Comm,Serial
 10,295,269,18
 50,642,510,286
 100,1307,848,1110
